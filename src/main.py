@@ -6,6 +6,9 @@ Usage:
   python src/main.py --poll                             # polling driver
   python src/main.py --register <BOT_NAME>              # register a bot
 """
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 import warnings
 warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
@@ -94,6 +97,7 @@ def main():
 
     # ── Auth ───────────────────────────────────────────────
     base_token = cfg["lark"]["base_token"]
+    table_id = cfg["lark"].get("table_id", "tblVPcVfpolbbPBL")
 
     creds = Credentials()
     for bot_name in ("manager", "editor", "reviewer"):
@@ -104,9 +108,9 @@ def main():
 
     # ── Base API (one client per bot identity) ─────────────
     print("[Base] Initializing bot clients...")
-    manager_api = BaseClient(bot_name="manager", base_token=base_token)
-    editor_api = BaseClient(bot_name="editor", base_token=base_token)
-    reviewer_api = BaseClient(bot_name="reviewer", base_token=base_token)
+    manager_api = BaseClient(bot_name="manager", base_token=base_token, table_id=table_id)
+    editor_api = BaseClient(bot_name="editor", base_token=base_token, table_id=table_id)
+    reviewer_api = BaseClient(bot_name="reviewer", base_token=base_token, table_id=table_id)
     print("[Base] manager / editor / reviewer OK")
 
     # ── LLM ───────────────────────────────────────────────

@@ -31,10 +31,9 @@ class ManagerAgent:
     def create_topic(self, title: str, priority: str = "中") -> str:
         """Create a new content topic task."""
         record_id = self.api.create_task({
-            "任务标题": title,
+            "标题": title,
             "状态": "待处理",
-            "负责人": self.name,
-            "优先级": priority,
+            "类型": priority,
         })
         self.api.log_operation(
             operator=self.name,

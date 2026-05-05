@@ -46,11 +46,12 @@ def _handle_api_error(op_name: str, response):
 class BaseClient:
     """Feishu Base client using bot authentication."""
 
-    def __init__(self, bot_name: str, base_token: str):
+    def __init__(self, bot_name: str, base_token: str, table_id: str = "tblVPcVfpolbbPBL"):
         from src.auth.app_auth import Credentials
 
         self.base_token = base_token
         self._bot_name = bot_name
+        self._table_id = table_id
 
         creds = Credentials()
         bot = creds.get(bot_name)
@@ -67,7 +68,7 @@ class BaseClient:
         """Build request option with current app_access_token."""
         from src.auth.app_auth import get_token
         from lark_oapi.core.token import RequestOptionBuilder
-        return RequestOptionBuilder().user_access_token(get_token(self._bot_name)).build()
+        return RequestOptionBuilder().app_access_token(get_token(self._bot_name)).build()
 
     def update_token(self, new_token: str):
         """Update the cached token (called after refresh)."""
@@ -80,7 +81,7 @@ class BaseClient:
             fields["状态"] = "待处理"
         request = CreateAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblVPcVfpolbbPBL") \
+            .table_id(self._table_id) \
             .request_body(AppTableRecord.builder().fields(fields).build()) \
             .build()
         response = self._client.bitable.v1.app_table_record.create(request, self._opt())
@@ -91,7 +92,7 @@ class BaseClient:
     def list_tasks(self) -> list:
         request = ListAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblVPcVfpolbbPBL") \
+            .table_id(self._table_id) \
             .page_size(100) \
             .build()
         response = self._client.bitable.v1.app_table_record.list(request, self._opt())
@@ -102,7 +103,7 @@ class BaseClient:
     def update_task_status(self, record_id: str, new_status: str) -> bool:
         request = UpdateAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblVPcVfpolbbPBL") \
+            .table_id(self._table_id) \
             .record_id(record_id) \
             .request_body(AppTableRecord.builder().fields({"状态": new_status}).build()) \
             .build()
@@ -114,7 +115,7 @@ class BaseClient:
     def get_task(self, record_id: str) -> dict:
         request = GetAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblVPcVfpolbbPBL") \
+            .table_id(self._table_id) \
             .record_id(record_id) \
             .build()
         response = self._client.bitable.v1.app_table_record.get(request, self._opt())
@@ -127,7 +128,7 @@ class BaseClient:
     def create_content(self, fields: dict) -> str:
         request = CreateAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblPHI9PtdSZR16b") \
+            .table_id(self._table_id) \
             .request_body(AppTableRecord.builder().fields(fields).build()) \
             .build()
         response = self._client.bitable.v1.app_table_record.create(request, self._opt())
@@ -138,7 +139,7 @@ class BaseClient:
     def list_contents(self) -> list:
         request = ListAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblPHI9PtdSZR16b") \
+            .table_id(self._table_id) \
             .page_size(100) \
             .build()
         response = self._client.bitable.v1.app_table_record.list(request, self._opt())
@@ -149,7 +150,7 @@ class BaseClient:
     def get_content(self, record_id: str) -> dict:
         request = GetAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblPHI9PtdSZR16b") \
+            .table_id(self._table_id) \
             .record_id(record_id) \
             .build()
         response = self._client.bitable.v1.app_table_record.get(request, self._opt())
@@ -160,7 +161,7 @@ class BaseClient:
     def update_content_status(self, record_id: str, new_status: str) -> bool:
         request = UpdateAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tblPHI9PtdSZR16b") \
+            .table_id(self._table_id) \
             .record_id(record_id) \
             .request_body(AppTableRecord.builder().fields({"状态": new_status}).build()) \
             .build()
@@ -174,7 +175,7 @@ class BaseClient:
     def create_review_task(self, fields: dict) -> str:
         request = CreateAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tbleARaOWoXJR8a2") \
+            .table_id(self._table_id) \
             .request_body(AppTableRecord.builder().fields(fields).build()) \
             .build()
         response = self._client.bitable.v1.app_table_record.create(request, self._opt())
@@ -185,7 +186,7 @@ class BaseClient:
     def list_pending_reviews(self) -> list:
         request = ListAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tbleARaOWoXJR8a2") \
+            .table_id(self._table_id) \
             .page_size(100) \
             .build()
         response = self._client.bitable.v1.app_table_record.list(request, self._opt())
@@ -195,12 +196,12 @@ class BaseClient:
 
     def update_review_status(self, record_id: str, status: str,
                              opinion: str = "") -> bool:
-        fields = {"审核状态": status}
+        fields = {"状态": status}
         if opinion:
             fields["审核意见"] = opinion
         request = UpdateAppTableRecordRequest.builder() \
             .app_token(self.base_token) \
-            .table_id("tbleARaOWoXJR8a2") \
+            .table_id(self._table_id) \
             .record_id(record_id) \
             .request_body(AppTableRecord.builder().fields(fields).build()) \
             .build()
@@ -213,18 +214,4 @@ class BaseClient:
 
     def log_operation(self, operator: str, op_type: str, record_id: str,
                       detail: str) -> str:
-        fields = {
-            "操作者": operator,
-            "操作类型": op_type,
-            "关联记录ID": record_id,
-            "变更内容": detail,
-        }
-        request = CreateAppTableRecordRequest.builder() \
-            .app_token(self.base_token) \
-            .table_id("tblTSFzb7IbwJeQm") \
-            .request_body(AppTableRecord.builder().fields(fields).build()) \
-            .build()
-        response = self._client.bitable.v1.app_table_record.create(request, self._opt())
-        if not response.success():
-            _handle_api_error("log_operation", response)
-        return response.data.record.record_id
+        return ""

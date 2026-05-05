@@ -60,12 +60,9 @@ Write the full article now:"""
         )
 
         content_id = self.api.create_content({
-            "内容标题": title,
-            "正文摘要": summary,
-            "正文全文": article,
-            "分类": category,
-            "字数": len(article),
-            "关联任务ID": task_record_id,
+            "标题": title,
+            "正文": article,
+            "类型": category,
             "状态": "处理中",
         })
         self.api.update_task_status(task_record_id, "待审核")
@@ -80,10 +77,8 @@ Write the full article now:"""
     def submit_for_review(self, content_record_id: str, task_record_id: str) -> str:
         """Submit content for review."""
         review_id = self.api.create_review_task({
-            "关联内容ID": content_record_id,
-            "审核人": "质量审核",
-            "审核状态": "待审核",
-            "优先级": "中",
+            "标题": f"审核任务-{content_record_id}",
+            "状态": "待审核",
         })
         self.api.log_operation(
             operator=self.name,
